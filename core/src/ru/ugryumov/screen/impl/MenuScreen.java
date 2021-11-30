@@ -30,7 +30,6 @@ public class MenuScreen extends BaseScreen {
         this.game = game;
     }
 
-
     @Override
     public void show() {
         super.show();
