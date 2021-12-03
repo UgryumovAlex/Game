@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.ugryumov.math.Rect;
+import ru.ugryumov.pool.impl.BulletPool;
 import ru.ugryumov.screen.BaseScreen;
 import ru.ugryumov.sprite.impl.Background;
 import ru.ugryumov.sprite.impl.BattleShip;
@@ -21,6 +22,8 @@ public class GameScreen extends BaseScreen {
     private Star[] stars;
     private BattleShip battleShip;
 
+    private BulletPool bulletPool;
+
     @Override
     public void show() {
         super.show();
@@ -34,13 +37,16 @@ public class GameScreen extends BaseScreen {
             stars[i] = new Star(atlas);
         }
 
-        battleShip = new BattleShip(atlas);
+        bulletPool = new BulletPool();
+
+        battleShip = new BattleShip(atlas, bulletPool);
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
         update(delta);
+        freeAllDestroyed();
         draw();
     }
 
@@ -59,16 +65,31 @@ public class GameScreen extends BaseScreen {
         super.dispose();
         bg.dispose();
         atlas.dispose();
+        bulletPool.dispose();
     }
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
-        return super.touchDown(touch, pointer, button);
+        battleShip.touchDown(touch, pointer, button);
+        return false;
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer, int button) {
-        return super.touchUp(touch, pointer, button);
+        battleShip.touchUp(touch, pointer, button);
+        return false;
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        battleShip.keyDown(keycode);
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        battleShip.keyUp(keycode);
+        return false;
     }
 
     private void update(float delta) {
@@ -76,6 +97,11 @@ public class GameScreen extends BaseScreen {
             star.update(delta);
         }
         battleShip.update(delta);
+        bulletPool.updateActiveSprites(delta);
+    }
+
+    private void freeAllDestroyed() {
+        bulletPool.freeAllDestroyed();
     }
 
     private void draw() {
@@ -85,18 +111,8 @@ public class GameScreen extends BaseScreen {
             star.draw(batch);
         }
         battleShip.draw(batch);
+        bulletPool.drawActiveSprites(batch);
         batch.end();
     }
 
-    @Override
-    public boolean keyDown(int keycode) {
-        battleShip.movementStart(keycode);
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        battleShip.movementStop();
-        return false;
-    }
 }
