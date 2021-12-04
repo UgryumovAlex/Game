@@ -1,6 +1,7 @@
 package ru.ugryumov.sprite.impl;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -20,6 +21,7 @@ public class BattleShip extends Sprite {
     private static final byte RIGHT = 2;
     private static final byte UP = 3;
     private static final byte DOWN = 4;
+    private static final float SHOOTING_INTERVAL = 0.2f;
 
 
     private final BulletPool bulletPool;
@@ -40,8 +42,12 @@ public class BattleShip extends Sprite {
     private int leftPointer = INVALID_POINTER;
     private int rightPointer = INVALID_POINTER;
 
+    private boolean shooting_mode = false;
+    private float shooting_timer;
 
-    public BattleShip(TextureAtlas atlas, BulletPool bulletPool) {
+    private Sound bulletSound;
+
+    public BattleShip(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
         this.v_speed = new Vector2();
         this.v0 = new Vector2(0.5f, 0f);
@@ -49,7 +55,10 @@ public class BattleShip extends Sprite {
         this.bulletRegion = atlas.findRegion("bulletMainShip");
         this.bulletV = new Vector2(0, 0.5f);
         this.bulletHeight = 0.01f;
+        this.bulletSound = bulletSound;
         this.damage = 1;
+        this.shooting_mode = false;
+        this.shooting_timer = 0;
     }
 
     @Override
@@ -63,6 +72,14 @@ public class BattleShip extends Sprite {
     public void update(float delta) {
         this.pos.add(v_speed);
         checkBounds();
+
+        shooting_timer += delta;
+        if (shooting_timer > SHOOTING_INTERVAL) {
+            shooting_timer = 0;
+            if (shooting_mode) {
+                shoot();
+            }
+        }
     }
 
     private void checkBounds() {
@@ -100,18 +117,23 @@ public class BattleShip extends Sprite {
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
-        if (touch.x < worldBounds.pos.x) {
-            if (leftPointer != INVALID_POINTER) {
-                return false;
-            }
-            leftPointer = pointer;
-            move(LEFT);
+        if (isMe(touch)) {
+            shoot();
+            shooting_mode = !shooting_mode;
         } else {
-            if (rightPointer != INVALID_POINTER) {
-                return false;
+            if (touch.x < worldBounds.pos.x) {
+                if (leftPointer != INVALID_POINTER) {
+                    return false;
+                }
+                leftPointer = pointer;
+                move(LEFT);
+            } else {
+                if (rightPointer != INVALID_POINTER) {
+                    return false;
+                }
+                rightPointer = pointer;
+                move(RIGHT);
             }
-            rightPointer = pointer;
-            move(RIGHT);
         }
         return false;
     }
@@ -229,5 +251,6 @@ public class BattleShip extends Sprite {
     private void shoot() {
         Bullet bullet = bulletPool.obtain();
         bullet.set(this, bulletRegion, pos, bulletV, bulletHeight, worldBounds, damage);
+        bulletSound.play();
     }
 }

@@ -1,5 +1,7 @@
 package ru.ugryumov.screen.impl;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
@@ -23,6 +25,7 @@ public class GameScreen extends BaseScreen {
     private BattleShip battleShip;
 
     private BulletPool bulletPool;
+    private Sound bulletSound;
 
     @Override
     public void show() {
@@ -38,8 +41,9 @@ public class GameScreen extends BaseScreen {
         }
 
         bulletPool = new BulletPool();
+        bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/bullet.wav"));
 
-        battleShip = new BattleShip(atlas, bulletPool);
+        battleShip = new BattleShip(atlas, bulletPool, bulletSound);
     }
 
     @Override
@@ -66,6 +70,7 @@ public class GameScreen extends BaseScreen {
         bg.dispose();
         atlas.dispose();
         bulletPool.dispose();
+        bulletSound.dispose();
     }
 
     @Override
