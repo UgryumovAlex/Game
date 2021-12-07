@@ -3,36 +3,25 @@ package ru.ugryumov.sprite.impl;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.ugryumov.math.Rect;
 import ru.ugryumov.pool.impl.BulletPool;
-import ru.ugryumov.sprite.Sprite;
+import ru.ugryumov.sprite.Ship;
 
-public class BattleShip extends Sprite {
+public class BattleShip extends Ship {
 
     private static final float HEIGHT = 0.1f;
     private static final float MARGIN = 0.03f;
+    private static final float SHOOTING_INTERVAL = 0.2f;
+    private static final float SPEED = 0.2f;
+
     private static final int INVALID_POINTER = -1;
-    private static final float SPEED = 0.005f;
     private static final byte STOP = 0;
     private static final byte LEFT = 1;
     private static final byte RIGHT = 2;
     private static final byte UP = 3;
     private static final byte DOWN = 4;
-    private static final float SHOOTING_INTERVAL = 0.2f;
-
-
-    private final BulletPool bulletPool;
-    private final TextureRegion bulletRegion;
-    private final Vector2 bulletV;
-    private final float bulletHeight;
-    private final int damage;
-
-    private Rect worldBounds;
-    private final Vector2 v_speed;
-    private final Vector2 v0;
 
     private boolean pressedLeft;
     private boolean pressedRight;
@@ -42,23 +31,19 @@ public class BattleShip extends Sprite {
     private int leftPointer = INVALID_POINTER;
     private int rightPointer = INVALID_POINTER;
 
-    private boolean shooting_mode = false;
-    private float shooting_timer;
-
-    private Sound bulletSound;
-
     public BattleShip(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
         this.v_speed = new Vector2();
-        this.v0 = new Vector2(0.5f, 0f);
+        this.v0 = SPEED;
         this.bulletPool = bulletPool;
+        this.bulletSound = bulletSound;
         this.bulletRegion = atlas.findRegion("bulletMainShip");
         this.bulletV = new Vector2(0, 0.5f);
         this.bulletHeight = 0.01f;
-        this.bulletSound = bulletSound;
         this.damage = 1;
-        this.shooting_mode = false;
-        this.shooting_timer = 0;
+        this.reloadTimer = 0;
+        this.reloadInterval = SHOOTING_INTERVAL;
+        this.auto_shooting = false;
     }
 
     @Override
@@ -70,16 +55,8 @@ public class BattleShip extends Sprite {
 
     @Override
     public void update(float delta) {
-        this.pos.add(v_speed);
+        super.update(delta);
         checkBounds();
-
-        shooting_timer += delta;
-        if (shooting_timer > SHOOTING_INTERVAL) {
-            shooting_timer = 0;
-            if (shooting_mode) {
-                shoot();
-            }
-        }
     }
 
     private void checkBounds() {
@@ -102,13 +79,13 @@ public class BattleShip extends Sprite {
 
     private void move(byte direction) {
         switch (direction) {
-            case (UP)    : v_speed.set(0f, SPEED);
+            case (UP)    : v_speed.set(0f, v0);
                 break;
-            case (DOWN)  : v_speed.set(0f, -SPEED);
+            case (DOWN)  : v_speed.set(0f, -v0);
                 break;
-            case (LEFT)  : v_speed.set(-SPEED, 0f);
+            case (LEFT)  : v_speed.set(-v0, 0f);
                 break;
-            case (RIGHT) : v_speed.set(SPEED, 0f);
+            case (RIGHT) : v_speed.set(v0, 0f);
                 break;
             case (STOP)  : v_speed.set(0f,0f);
                 break;
@@ -119,7 +96,7 @@ public class BattleShip extends Sprite {
     public boolean touchDown(Vector2 touch, int pointer, int button) {
         if (isMe(touch)) {
             shoot();
-            shooting_mode = !shooting_mode;
+            auto_shooting = !auto_shooting;
         } else {
             if (touch.x < worldBounds.pos.x) {
                 if (leftPointer != INVALID_POINTER) {
@@ -248,9 +225,4 @@ public class BattleShip extends Sprite {
         return false;
     }
 
-    private void shoot() {
-        Bullet bullet = bulletPool.obtain();
-        bullet.set(this, bulletRegion, pos, bulletV, bulletHeight, worldBounds, damage);
-        bulletSound.play();
-    }
 }
