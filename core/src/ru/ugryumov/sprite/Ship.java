@@ -28,6 +28,8 @@ public class Ship extends Sprite {
 
     protected int hp; //живучесть корабля
 
+    protected float occurenceBoost; //Ускорение при появлении на игровом поле
+
     public Ship() {
     }
 
@@ -37,15 +39,18 @@ public class Ship extends Sprite {
 
     @Override
     public void update(float delta) {
-        pos.mulAdd(v_speed, delta);
-        reloadTimer += delta;
-        if (reloadTimer > reloadInterval) {
-            reloadTimer = 0f;
-            if (auto_shooting) {
-                shoot();
+        if (this.getTop() > worldBounds.getTop()) {
+            pos.mulAdd(v_speed, delta*occurenceBoost); //Ускоряемся для появлении на игровом поле
+        } else {
+            pos.mulAdd(v_speed, delta);
+            reloadTimer += delta;
+            if (reloadTimer > reloadInterval) {
+                reloadTimer = 0f;
+                if (auto_shooting) {
+                    shoot();
+                }
             }
         }
-
     }
 
     protected void shoot() {

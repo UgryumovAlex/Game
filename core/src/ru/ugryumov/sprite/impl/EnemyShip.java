@@ -34,7 +34,8 @@ public class EnemyShip extends Ship {
             int damage,
             float reloadInterval,
             float height,
-            int hp
+            int hp,
+            float occurenceBoost
     ) {
         this.regions = regions;
         this.v_speed.set(v);
@@ -43,7 +44,9 @@ public class EnemyShip extends Ship {
         this.bulletV = bulletV;
         this.damage = damage;
         this.reloadInterval = reloadInterval;
+        this.reloadTimer = reloadInterval - Math.abs(v.y); //Пусть вражеский корабль стреляет сразу
         setHeightProportion(height);
         this.hp = hp;
+        this.occurenceBoost = occurenceBoost;
     }
 }

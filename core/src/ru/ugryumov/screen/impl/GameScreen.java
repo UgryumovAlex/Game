@@ -12,6 +12,7 @@ import ru.ugryumov.pool.impl.EnemyPool;
 import ru.ugryumov.screen.BaseScreen;
 import ru.ugryumov.sprite.impl.Background;
 import ru.ugryumov.sprite.impl.BattleShip;
+import ru.ugryumov.sprite.impl.EnemyShip;
 import ru.ugryumov.sprite.impl.Star;
 import ru.ugryumov.util.EnemyEmitter;
 
@@ -116,6 +117,17 @@ public class GameScreen extends BaseScreen {
         bulletPool.updateActiveSprites(delta);
         enemyPool.updateActiveSprites(delta);
         enemyEmitter.generate(delta);
+
+        checkShipCollisions();
+    }
+
+    /*Проверка столкновения кореблей. Враг уничтожается*/
+    private void checkShipCollisions() {
+        for ( EnemyShip enemyShip : enemyPool.getActiveObjects() ) {
+            if (!enemyShip.isOutside(battleShip)) {
+                enemyShip.destroy();
+            }
+        }
     }
 
     private void freeAllDestroyed() {
