@@ -6,12 +6,18 @@ import com.badlogic.gdx.math.Vector2;
 
 import ru.ugryumov.math.Rect;
 import ru.ugryumov.pool.impl.BulletPool;
+import ru.ugryumov.pool.impl.ExplosionPool;
 import ru.ugryumov.sprite.impl.Bullet;
+import ru.ugryumov.sprite.impl.Explosion;
 
 public class Ship extends Sprite {
 
+    private static final float DAMAGE_ANIMATE_INTERVAL = 0.1f;
+
     protected Vector2 v_speed; //вектор перемещения
     protected float   v0;      //скорость
+
+    protected ExplosionPool explosionPool;
 
     //Параметры оружия корабля
     protected BulletPool bulletPool;
@@ -29,6 +35,8 @@ public class Ship extends Sprite {
     protected int hp; //живучесть корабля
 
     protected float occurenceBoost; //Ускорение при появлении на игровом поле
+
+    private float damageAnimateTimer = DAMAGE_ANIMATE_INTERVAL;
 
     public Ship() {
     }
@@ -51,11 +59,42 @@ public class Ship extends Sprite {
                 }
             }
         }
+
+        damageAnimateTimer += delta;
+        if (damageAnimateTimer >= DAMAGE_ANIMATE_INTERVAL) {
+            frame = 0;
+        }
     }
 
     protected void shoot() {
         Bullet bullet = bulletPool.obtain();
         bullet.set(this, bulletRegion, pos, bulletV, bulletHeight, worldBounds, damage);
         bulletSound.play();
+    }
+
+    public void damage(int damage) {
+        hp -= damage;
+        if (hp <= 0) {
+            hp = 0;
+            destroy();
+        }
+
+        damageAnimateTimer = 0f;
+        frame = 1;
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        boom();
+    }
+
+    private void boom() {
+        Explosion explosion = explosionPool.obtain();
+        explosion.set(pos, getHeight());
     }
 }

@@ -6,11 +6,13 @@ import com.badlogic.gdx.math.Vector2;
 
 import ru.ugryumov.math.Rect;
 import ru.ugryumov.pool.impl.BulletPool;
+import ru.ugryumov.pool.impl.ExplosionPool;
 import ru.ugryumov.sprite.Ship;
 
 public class EnemyShip extends Ship {
 
-    public EnemyShip(BulletPool bulletPool, Sound bulletSound, Rect worldBounds) {
+    public EnemyShip(ExplosionPool explosionPool, BulletPool bulletPool, Sound bulletSound, Rect worldBounds) {
+        this.explosionPool = explosionPool;
         this.bulletPool = bulletPool;
         this.bulletSound = bulletSound;
         this.worldBounds = worldBounds;
@@ -48,5 +50,14 @@ public class EnemyShip extends Ship {
         setHeightProportion(height);
         this.hp = hp;
         this.occurenceBoost = occurenceBoost;
+    }
+
+    public boolean isBulletCollision(Bullet bullet) {
+        return !(
+                     bullet.getRight() < getLeft()
+                  || bullet.getLeft() > getRight()
+                  || bullet.getBottom() > getTop()
+                  || bullet.getTop() < pos.y
+                );
     }
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import ru.ugryumov.math.Rect;
 import ru.ugryumov.pool.impl.BulletPool;
+import ru.ugryumov.pool.impl.ExplosionPool;
 import ru.ugryumov.sprite.Ship;
 
 public class BattleShip extends Ship {
@@ -31,10 +32,11 @@ public class BattleShip extends Ship {
     private int leftPointer = INVALID_POINTER;
     private int rightPointer = INVALID_POINTER;
 
-    public BattleShip(TextureAtlas atlas, BulletPool bulletPool, Sound bulletSound) {
+    public BattleShip(TextureAtlas atlas, ExplosionPool explosionPool, BulletPool bulletPool, Sound bulletSound) {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
         this.v_speed = new Vector2();
         this.v0 = SPEED;
+        this.explosionPool = explosionPool;
         this.bulletPool = bulletPool;
         this.bulletSound = bulletSound;
         this.bulletRegion = atlas.findRegion("bulletMainShip");
@@ -44,6 +46,7 @@ public class BattleShip extends Ship {
         this.reloadTimer = 0;
         this.reloadInterval = SHOOTING_INTERVAL;
         this.auto_shooting = false;
+        this.hp = 1;
     }
 
     @Override
@@ -225,4 +228,12 @@ public class BattleShip extends Ship {
         return false;
     }
 
+    public boolean isBulletCollision(Bullet bullet) {
+        return !(
+                bullet.getRight() < getLeft()
+                        || bullet.getLeft() > getRight()
+                        || bullet.getBottom() > pos.y
+                        || bullet.getTop() < getBottom()
+        );
+    }
 }
