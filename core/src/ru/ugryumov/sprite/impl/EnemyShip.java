@@ -23,7 +23,8 @@ public class EnemyShip extends Ship {
     public void update(float delta) {
         super.update(delta);
         if (getBottom() < worldBounds.getBottom()) {
-            destroy();
+            //destroy();
+            clear(); //Пусть в ситуации, когда вражеский корабль дошёл до конца экрана, он просто улетает без взрыва
         }
     }
 

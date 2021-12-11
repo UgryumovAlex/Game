@@ -24,6 +24,8 @@ public class BattleShip extends Ship {
     private static final byte UP = 3;
     private static final byte DOWN = 4;
 
+    private static final int BATTLE_SHIP_HP = 1;
+
     private boolean pressedLeft;
     private boolean pressedRight;
     private boolean pressedUp;
@@ -46,7 +48,14 @@ public class BattleShip extends Ship {
         this.reloadTimer = 0;
         this.reloadInterval = SHOOTING_INTERVAL;
         this.auto_shooting = false;
-        this.hp = 1;
+        this.hp = BATTLE_SHIP_HP;
+    }
+
+    /**Возвращаем корабль обратно в игру*/
+    public void returnToGame() {
+        this.hp = BATTLE_SHIP_HP;
+        this.pos.set(0, worldBounds.getBottom() + MARGIN);
+        flushDestroy();
     }
 
     @Override

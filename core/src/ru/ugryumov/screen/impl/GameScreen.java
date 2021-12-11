@@ -16,6 +16,7 @@ import ru.ugryumov.sprite.impl.BattleShip;
 import ru.ugryumov.sprite.impl.Bullet;
 import ru.ugryumov.sprite.impl.EnemyShip;
 import ru.ugryumov.sprite.impl.GameOver;
+import ru.ugryumov.sprite.impl.NewGame;
 import ru.ugryumov.sprite.impl.Star;
 import ru.ugryumov.util.EnemyEmitter;
 
@@ -26,6 +27,7 @@ public class GameScreen extends BaseScreen {
     private Texture bg;
     private Background background;
     private GameOver gameOver;
+    private NewGame newGame;
 
     private TextureAtlas atlas;
     private Star[] stars;
@@ -44,7 +46,7 @@ public class GameScreen extends BaseScreen {
     @Override
     public void show() {
         super.show();
-        bg = new Texture("textures/bg.png");
+        bg = new Texture("textures/earth.png");
         background = new Background(bg);
         atlas = new TextureAtlas("textures/mainAtlas.tpack");
         laserSound = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
@@ -52,6 +54,7 @@ public class GameScreen extends BaseScreen {
         explosionSound = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion.wav"));
 
         gameOver = new GameOver(atlas);
+        newGame = new NewGame(atlas);
 
         explosionPool = new ExplosionPool(atlas, explosionSound);
         bulletPool = new BulletPool();
@@ -89,6 +92,7 @@ public class GameScreen extends BaseScreen {
         }
         battleShip.resize(worldBounds);
         gameOver.resize(worldBounds);
+        newGame.resize(worldBounds);
     }
 
     @Override
@@ -106,9 +110,27 @@ public class GameScreen extends BaseScreen {
         explosionSound.dispose();
     }
 
+    /**Для новой игры убираем все пули и вражеские корабли*/
+    private void refreshGame() {
+
+        for (EnemyShip enemyShip : enemyPool.getActiveObjects()) {
+            enemyShip.clear();
+        }
+        enemyPool.freeAllDestroyed();
+
+        for (Bullet bullet : bulletPool.getActiveObjects()) {
+            bullet.destroy();
+        }
+        bulletPool.freeAllDestroyed();
+    }
+
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
         battleShip.touchDown(touch, pointer, button);
+        if (newGame.touchDown(touch, pointer, button)) { //Если нажали на NewGame, стартуем новую игру
+            refreshGame();
+            battleShip.returnToGame();
+        }
         return false;
     }
 
@@ -203,6 +225,7 @@ public class GameScreen extends BaseScreen {
             enemyPool.drawActiveSprites(batch);
         } else {
             gameOver.draw(batch);
+            newGame.draw(batch);
         }
         explosionPool.drawActiveSprites(batch);
         batch.end();

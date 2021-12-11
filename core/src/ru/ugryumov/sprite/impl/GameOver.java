@@ -16,5 +16,6 @@ public class GameOver extends Sprite {
     @Override
     public void resize(Rect worldBounds) {
         setHeightProportion(HEIGHT);
+        pos.y = 0.1f;
     }
 }

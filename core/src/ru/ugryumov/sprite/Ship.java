@@ -93,6 +93,10 @@ public class Ship extends Sprite {
         boom();
     }
 
+    public void clear() {
+        super.destroy();
+    }
+
     private void boom() {
         Explosion explosion = explosionPool.obtain();
         explosion.set(pos, getHeight());
