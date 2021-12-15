@@ -52,6 +52,7 @@ public class EnemyEmitter {
     private final TextureRegion[] enemyBigRegions;
 
     private float generateTimer;
+    private int level;
 
     public EnemyEmitter(TextureAtlas atlas, Rect worldBounds, EnemyPool enemyPool) {
         this.worldBounds = worldBounds;
@@ -62,10 +63,25 @@ public class EnemyEmitter {
         enemyBigRegions = Regions.split(atlas.findRegion("enemy2"), 1, 2, 2);
     }
 
-    public void generate(float delta) {
+    /**
+     * Уровень игры уменьшает промежуток времени между генерациями новых вражеских кораблей
+     * Шаг уменьшения 0.1f для каждого уровня. Минимальный период генерации 2f.
+     * */
+    public void generate(float delta, int frags) {
+        level = frags / 10 + 1;
+
+        float generationBoost = 0.1f;
+        if (level > 20) {
+            generationBoost *= 20;
+        } else {
+            generationBoost *= level;
+        }
+
         generateTimer += delta;
-        if (generateTimer > GENERATE_INTERVAL) {
+
+        if (generateTimer > (GENERATE_INTERVAL - generationBoost)) {
             generateTimer = 0f;
+
             EnemyShip enemyShip = enemyPool.obtain();
             float type = (float) Math.random();
             if (type < 0.5f) {
@@ -118,4 +134,9 @@ public class EnemyEmitter {
             );
         }
     }
+
+    public int getLevel() {
+        return level;
+    }
+
 }

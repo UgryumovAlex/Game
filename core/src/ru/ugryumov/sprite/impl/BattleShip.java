@@ -24,7 +24,7 @@ public class BattleShip extends Ship {
     private static final byte UP = 3;
     private static final byte DOWN = 4;
 
-    private static final int BATTLE_SHIP_HP = 1;
+    private static final int BATTLE_SHIP_HP = 100;
 
     private boolean pressedLeft;
     private boolean pressedRight;
@@ -56,6 +56,13 @@ public class BattleShip extends Ship {
         this.hp = BATTLE_SHIP_HP;
         this.pos.set(0, worldBounds.getBottom() + MARGIN);
         flushDestroy();
+        move(STOP);
+        leftPointer = INVALID_POINTER;
+        rightPointer = INVALID_POINTER;
+        pressedLeft = false;
+        pressedRight = false;
+        pressedUp = false;
+        pressedDown = false;
     }
 
     @Override
@@ -244,5 +251,9 @@ public class BattleShip extends Ship {
                         || bullet.getBottom() > pos.y
                         || bullet.getTop() < getBottom()
         );
+    }
+
+    public void addHPBonus(int hpBonus) {
+        this.hp += hpBonus;
     }
 }
